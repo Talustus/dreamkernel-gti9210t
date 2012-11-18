@@ -120,8 +120,6 @@ typedef struct cmd_tlv {
 #define CMD_ROAMDELTA_GET	"GETROAMDELTA"
 #define CMD_ROAMSCANPERIOD_SET	"SETROAMSCANPERIOD"
 #define CMD_ROAMSCANPERIOD_GET	"GETROAMSCANPERIOD"
-#define CMD_FULLROAMSCANPERIOD_SET	"SETFULLROAMSCANPERIOD"
-#define CMD_FULLROAMSCANPERIOD_GET	"GETFULLROAMSCANPERIOD"
 #define CMD_COUNTRYREV_SET	"SETCOUNTRYREV"
 #define CMD_COUNTRYREV_GET	"GETCOUNTRYREV"
 #endif /* ROAM_API */
@@ -357,48 +355,6 @@ static int wl_android_get_roam_scan_period(
 	return bytes_written;
 }
 
-int wl_android_set_full_roam_scan_period(
-	struct net_device *dev, char* command, int total_len)
-{
-	int error = 0;
-	int full_roam_scan_period = 0;
-	char smbuf[WLC_IOCTL_SMLEN];
-
-	sscanf(command+sizeof("SETFULLROAMSCANPERIOD"), "%d", &full_roam_scan_period);
-	WL_TRACE(("%s: fullroamperiod = %d\n", __func__, full_roam_scan_period));
-
-	error = wldev_iovar_setbuf(dev, "fullroamperiod", &full_roam_scan_period, 
-		sizeof(full_roam_scan_period), smbuf, sizeof(smbuf), NULL);
-	if (error) {
-		DHD_ERROR(("Failed to set full roam scan period, error = %d\n", error));
-	}
-
-	return error;
-}
-
-static int wl_android_get_full_roam_scan_period(
-	struct net_device *dev, char *command, int total_len)
-{
-	int error;
-	int bytes_written;
-	int full_roam_scan_period = 0;
-
-	error = wldev_iovar_getint(dev, "fullroamperiod", &full_roam_scan_period);
-
-	if (error) {
-		DHD_ERROR(("%s: get full roam scan period failed code %d\n",
-			__func__, error));
-		return -1;
-	} else {
-		DHD_INFO(("%s: get full roam scan period %d\n", __func__, full_roam_scan_period));
-	}
-
-	bytes_written = snprintf(command, total_len, "%s %d",
-						CMD_FULLROAMSCANPERIOD_GET, full_roam_scan_period);
-
-	return bytes_written;
-}
-
 int wl_android_set_country_rev(
 	struct net_device *dev, char* command, int total_len)
 {
@@ -448,12 +404,12 @@ static int wl_android_get_country_rev(
 			__func__, error));
 		return -1;
 	} else {
-		DHD_INFO(("%s: get country '%s %d'\n",
-			__func__, smbuf, smbuf[WLC_CNTRY_BUF_SZ]));
+		DHD_INFO(("%s: get country '%c%c %d'\n",
+			__func__, cspec.ccode[0], cspec.ccode[1], cspec.rev));
 	}
 
-	bytes_written = snprintf(command, total_len, "%s %d",
-		smbuf, smbuf[WLC_CNTRY_BUF_SZ]);
+	bytes_written = snprintf(command, total_len, "%c%c %d",
+		cspec.ccode[0], cspec.ccode[1], cspec.rev);
 
 	return bytes_written;
 }
@@ -1058,14 +1014,12 @@ int wl_android_priv_cmd(struct net_device *net, struct ifreq *ifr, int cmd)
 		/* TBD: BTCOEXSCAN-STOP */
 	}
 	else if (strnicmp(command, CMD_BTCOEXMODE, strlen(CMD_BTCOEXMODE)) == 0) {
-#if !defined(CUSTOMER_HW_SAMSUNG)
 		uint mode = *(command + strlen(CMD_BTCOEXMODE) + 1) - '0';
 
 		if (mode == 1)
 			net_os_set_packet_filter(net, 0); /* DHCP starts */
 		else
 			net_os_set_packet_filter(net, 1); /* DHCP ends */
-#endif
 #ifdef WL_CFG80211
 		bytes_written = wl_cfg80211_set_btcoex_dhcp(net, command);
 #endif
@@ -1112,14 +1066,6 @@ int wl_android_priv_cmd(struct net_device *net, struct ifreq *ifr, int cmd)
 	} else if (strnicmp(command, CMD_ROAMSCANPERIOD_GET,
 				strlen(CMD_ROAMSCANPERIOD_GET)) == 0) {
 		bytes_written = wl_android_get_roam_scan_period(net, command,
-				priv_cmd.total_len);
-	} else if (strnicmp(command, CMD_FULLROAMSCANPERIOD_SET,
-				strlen(CMD_FULLROAMSCANPERIOD_SET)) == 0) {
-		bytes_written = wl_android_set_full_roam_scan_period(net, command,
-				priv_cmd.total_len);
-	} else if (strnicmp(command, CMD_FULLROAMSCANPERIOD_GET,
-				strlen(CMD_FULLROAMSCANPERIOD_GET)) == 0) {
-		bytes_written = wl_android_get_full_roam_scan_period(net, command,
 				priv_cmd.total_len);
 	} else if (strnicmp(command, CMD_COUNTRYREV_SET,
 				strlen(CMD_COUNTRYREV_SET)) == 0) {

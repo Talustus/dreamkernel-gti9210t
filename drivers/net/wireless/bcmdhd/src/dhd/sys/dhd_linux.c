@@ -3699,9 +3699,7 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 	setbit(eventmask, WLC_E_MIC_ERROR);
 	setbit(eventmask, WLC_E_ASSOC_REQ_IE);
 	setbit(eventmask, WLC_E_ASSOC_RESP_IE);
-#ifndef WL_CFG80211
 	setbit(eventmask, WLC_E_PMKID_CACHE);
-#endif
 	setbit(eventmask, WLC_E_TXFAIL);
 	setbit(eventmask, WLC_E_JOIN_START);
 	setbit(eventmask, WLC_E_SCAN_COMPLETE);
@@ -3761,31 +3759,9 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 
 #ifdef PKT_FILTER_SUPPORT
 	/* Setup defintions for pktfilter , enable in suspend */
-	dhd->pktfilter_count = 4;
-#ifdef GAN_LITE_NAT_KEEPALIVE_FILTER
-	/* Setup filter to block broadcast and NAT Keepalive packets */
-	dhd->pktfilter[0] = "100 0 0 0 0xffffff 0xffffff"; /* discard all broadcast packets */
-	dhd->pktfilter[1] = "102 0 0 36 0xffffffff 0x11940009"; /* discard NAT Keepalive packets */
-	dhd->pktfilter[2] = "104 0 0 38 0xffffffff 0x11940009"; /* discard NAT Keepalive packets */
-	dhd->pktfilter[3] = NULL;
-#else
-	/* Setup filter to allow only unicast */
-#if defined(CUSTOMER_HW_SAMSUNG)
-	dhd->pktfilter_count = 5;
-	dhd->pktfilter[0] = "100 0 0 0 "
-		HEX_PREF_STR UNI_FILTER_STR ZERO_ADDR_STR ETHER_TYPE_STR IPV6_FILTER_STR
-		" "
-		HEX_PREF_STR ZERO_ADDR_STR ZERO_ADDR_STR ETHER_TYPE_STR ZERO_TYPE_STR;
-		dhd->pktfilter[4] = "104 0 0 0 0xFFFFFF 0x01005E";
-		/* customer want to get IPV4 multicast packets */
-#else
-#error Customer want to filter out all IPV6 packets
+	dhd->pktfilter_count = 1;
 	dhd->pktfilter[0] = "100 0 0 0 0x01 0x00";
-#endif
-	dhd->pktfilter[1] = NULL;
-	dhd->pktfilter[2] = NULL;
-	dhd->pktfilter[3] = NULL;
-#endif /* GAN_LITE_NAT_KEEPALIVE_FILTER */
+
 #if defined(SOFTAP)
 	if (ap_fw_loaded) {
 		int i;
@@ -4587,13 +4563,13 @@ dhd_os_wd_timer(void *bus, uint wdtick)
 	/* Totally stop the timer */
 	if (!wdtick && dhd->wd_timer_valid == TRUE) {
 		dhd->wd_timer_valid = FALSE;
+		dhd_os_spin_unlock(pub, flags);
 		if (dhd)
 #ifdef DHDTHREAD
 		del_timer_sync(&dhd->timer);
 #else
 		del_timer(&dhd->timer);
 #endif /* DHDTHREAD */
-		dhd_os_spin_unlock(pub, flags);
 		return;
 	}
 
