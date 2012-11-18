@@ -14,12 +14,12 @@ TXTCLR='\e[0m'    		# Text Reset
 #
 export KERNELDIR=`readlink -f .`
 export TOOLBIN="${KERNELDIR}/../bin"
-export INITRAMFS_SOURCE="${KERNELDIR}/../initramfs"
+export INITRAMFS_SOURCE="${KERNELDIR}/../initramfs-ics-stock"
 export INITRAMFS_TMP="/tmp/initramfs-gti9210t"
 export RELEASEDIR="${KERNELDIR}/../releases"
 
 # InitRamFS Branch to use ...
-export RAMFSBRANCH=cm10-testing
+# export RAMFSBRANCH=cm10-testing
 
 # Build Hostname
 export KBUILD_BUILD_HOST=`hostname | sed 's|ip-projects.de|dream-irc.com|g'`
@@ -27,7 +27,7 @@ export KBUILD_BUILD_HOST=`hostname | sed 's|ip-projects.de|dream-irc.com|g'`
 #
 # Version of this Build
 #
-KRNRLS="DreamKernel-GTI9210T-v1.7.1CM10"
+KRNRLS="DreamKernel-GTI9210T-v2.0.1ICS"
 
 
 #
@@ -54,7 +54,7 @@ fi
 if [ ! -f $KERNELDIR/.config ];
 then
   echo -e "${TXTYLW}Kernel config does not exists, creating default config (dream_gti9210t_defconfig):${TXTCLR}"
-  make ARCH=arm dream_gti9210t_defconfig
+  make ARCH=arm gti9210t_defconfig
   echo -e "${TXTYLW}Kernel config created .. redo the command: $0:${TXTCLR}"
   exit 0
 fi
@@ -86,7 +86,7 @@ rm -v $KERNELDIR/boot.img
 #
 echo -e "${TXTYLW}CleanUP done, starting kernel Build ...${TXTCLR}"
 
-nice -n 10 make -j12 modules 2>&1 | tee compile-modules.log || exit 1
+nice -n 10 make -j9 modules 2>&1 | tee compile-modules.log || exit 1
 # nice -n 10 make -j12 KBUILD_BUILD_HOST="$KBUILD_BUILD_HOST" modules 2>&1 | tee compile-modules.log || exit 1
 #
 echo -e "${TXTYLW}Modules Build done ...${TXTCLR}"
@@ -147,7 +147,7 @@ sleep 1
 # Start Final Kernel Build
 #
 echo -e "${TXTYLW}Starting final Build: Stage 2${TXTCLR}"
-nice -n 10 make -j10 zImage 2>&1 | tee compile-zImage.log || exit 1
+nice -n 10 make -j9 zImage 2>&1 | tee compile-zImage.log || exit 1
 sleep 1
 cp -v $KERNELDIR/arch/arm/boot/zImage $KERNELDIR/arch/arm/boot/kernel
 
