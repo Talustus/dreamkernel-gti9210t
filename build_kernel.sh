@@ -28,7 +28,7 @@ export KBUILD_BUILD_HOST=`hostname | sed 's|ip-projects.de|dream-irc.com|g'`
 #
 # Version of this Build
 #
-KRNRLS="DreamKernel-GTI9210T-v1.8.2CM10"
+KRNRLS="DreamKernel-GTI9210T-v1.8.3CM10"
 
 
 #
@@ -55,9 +55,9 @@ fi
 if [ ! -f $KERNELDIR/.config ];
 then
   echo -e "${TXTYLW}Kernel config does not exists, creating default config (dream_gti9210t_defconfig):${TXTCLR}"
-  make ARCH=arm dream_gti9210t_defconfig
-  echo -e "${TXTYLW}Kernel config created .. redo the command: $0:${TXTCLR}"
-  exit 0
+  make ARCH=arm dream_gti9210t_defconfig  2>&1 | grcat conf.gcc
+  echo -e "${TXTYLW}Kernel config created ...${TXTCLR}"
+  # exit 0
 fi
 
 . $KERNELDIR/.config
@@ -65,7 +65,8 @@ fi
 # remove Files of old/previous Builds
 #
 echo -e "${TXTYLW}Deleting Files of previous Builds ...${TXTCLR}"
-make -j10 clean
+make -j9 clean 2>&1 | grcat conf.gcc
+echo "0" > $KERNELDIR/.version
 
 # Remove Old initramfs
 echo -e "${TXTYLW}Deleting old InitRAMFS${TXTCLR}"
@@ -87,11 +88,17 @@ rm -v $KERNELDIR/boot.img
 #
 echo -e "${TXTYLW}CleanUP done, starting kernel Build ...${TXTCLR}"
 
-nice -n 10 make -j12 modules 2>&1 | tee compile-modules.log || exit 1
+nice -n 10 make -j9 modules 2>&1 | grcat conf.gcc
 # nice -n 10 make -j12 KBUILD_BUILD_HOST="$KBUILD_BUILD_HOST" modules 2>&1 | tee compile-modules.log || exit 1
 #
-echo -e "${TXTYLW}Modules Build done ...${TXTCLR}"
-sleep 2
+if [ "$?" == "0" ];
+then
+  echo -e "${TXTYLW}Modules Build done ...${TXTCLR}"
+  sleep 2
+else
+  echo -e "${BLDRED}Modules Build failed, exiting  ...${TXTCLR}"
+  exit 1
+fi
 
 echo -e "${TXTGRN}Build: Stage 1 successfully completed${TXTCLR}"
 
@@ -99,7 +106,7 @@ echo -e "${TXTGRN}Build: Stage 1 successfully completed${TXTCLR}"
 #
 echo -e "${TXTGRN}Copying initramfs Filesystem to: ${INITRAMFS_TMP}${TXTCLR}"
 cd $INITRAMFS_SOURCE
-git checkout $RAMFSBRANCH
+# git checkout $RAMFSBRANCH
 cd $KERNELDIR
 cp -vax $INITRAMFS_SOURCE $INITRAMFS_TMP
 sleep 1
@@ -148,38 +155,57 @@ sleep 1
 # Start Final Kernel Build
 #
 echo -e "${TXTYLW}Starting final Build: Stage 2${TXTCLR}"
-nice -n 10 make -j10 zImage 2>&1 | tee compile-zImage.log || exit 1
-sleep 1
-cp -v $KERNELDIR/arch/arm/boot/zImage $KERNELDIR/arch/arm/boot/kernel
+nice -n 10 make -j9 zImage 2>&1 | grcat conf.gcc
 
-echo " "
-echo -e "${TXTGRN}Final Build: Stage 3. Creating bootimage !${TXTCLR}"
-echo " "
+if [ "$?" == "0" ];
+then
+  echo " "
+  echo -e "${TXTGRN}Final Build: Stage 3. Creating bootimage !${TXTCLR}"
+  echo " "
+  sleep 1
+  cp -v $KERNELDIR/arch/arm/boot/zImage $KERNELDIR/arch/arm/boot/kernel
 
-$TOOLBIN/mkbootimg --kernel $KERNELDIR/arch/arm/boot/kernel --ramdisk $INITRAMFS_TMP.img --cmdline "androidboot.hardware=qcom msm_watchdog.appsbark=0 msm_watchdog.enable=1 init=/sbin/init console=/dev/console" --base 0x40400000 --pagesize 2048 --ramdiskaddr 0x41800000 --output $KERNELDIR/boot.img
-# $TOOLBIN/mkbootimg --kernel $KERNELOUT/arch/arm/boot/kernel --ramdisk $WORK_DIR/ramdisk.img --cmdline "androidboot.hardware=qcom msm_watchdog.appsbark=0 msm_watchdog.enable=1 no_console_suspend=true" --base 0x40400000 --pagesize 2048 --ramdiskaddr 0x41800000 --output $KERNELOUT/boot.img
-rm -v $KERNELDIR/arch/arm/boot/kernel
-echo " "
-echo -e "${TXTGRN}Final Build: Stage 3 completed successfully!${TXTCLR}"
-echo " "
+  $TOOLBIN/mkbootimg --kernel $KERNELDIR/arch/arm/boot/kernel --ramdisk $INITRAMFS_TMP.img --cmdline "androidboot.hardware=qcom msm_watchdog.appsbark=0 msm_watchdog.enable=1 init=/sbin/init console=/dev/console" --base 0x40400000 --pagesize 2048 --ramdiskaddr 0x41800000 --output $KERNELDIR/boot.img
+  # $TOOLBIN/mkbootimg --kernel $KERNELOUT/arch/arm/boot/kernel --ramdisk $WORK_DIR/ramdisk.img --cmdline "androidboot.hardware=qcom msm_watchdog.appsbark=0 msm_watchdog.enable=1 no_console_suspend=true" --base 0x40400000 --pagesize 2048 --ramdiskaddr 0x41800000 --output $KERNELOUT/boot.img
 
-# Create ODIN Flashable TAR archiv
-#
-ARCNAME="$KRNRLS-`date +%Y%m%d%H%M%S`"
+  if [ -f $KERNELDIR/boot.img ];
+  then
+    echo " "
+    echo -e "${TXTGRN}Final Build: Stage 3 completed successfully!${TXTCLR}"
+    echo " "
+    rm -v $KERNELDIR/arch/arm/boot/kernel
 
-echo -e "${BLDRED}creating ODIN-Flashable TARand CWM Zip ${ARCNAME}${TXTCLR}"
-cd $KERNELDIR
-tar cfv $RELEASEDIR/$ARCNAME.tar boot.img
+    # Create ODIN Flashable TAR archiv
+    #
+    ARCNAME="$KRNRLS-`date +%Y%m%d%H%M%S`"
+    echo -e "${BLDRED}creating ODIN-Flashable TARand CWM Zip ${ARCNAME}${TXTCLR}"
+    cd $KERNELDIR
+    tar cfv $RELEASEDIR/$ARCNAME.tar boot.img
 
-## CWM
-cp -v $RELEASEDIR/updater-template.zip $RELEASEDIR/$ARCNAME-CWM.zip
-zip -u $RELEASEDIR/$ARCNAME-CWM.zip boot.img
+    ## CWM
+    cp -v $RELEASEDIR/updater-template.zip $RELEASEDIR/$ARCNAME-CWM.zip
+    zip -u $RELEASEDIR/$ARCNAME-CWM.zip boot.img
 
-echo "  "
-ls -lh $RELEASEDIR/$ARCNAME.tar
-ls -lh $RELEASEDIR/$ARCNAME-CWM.zip
-cd -
+    echo "  "
+    ls -lh $RELEASEDIR/$ARCNAME.tar
+    ls -lh $RELEASEDIR/$ARCNAME-CWM.zip
+    cd -
 
-echo -e "${BLDGRN}	#############################	${TXTCLR}"
-echo -e "${TXTRED}	# Script completed, exiting #	${TXTCLR}"
-echo -e "${BLDGRN}	#############################	${TXTCLR}"
+    echo -e "${BLDGRN}	#############################	${TXTCLR}"
+    echo -e "${TXTRED}	# Script completed, exiting #	${TXTCLR}"
+    echo -e "${BLDGRN}	#############################	${TXTCLR}"
+    exit 0
+  else
+    echo " "
+    echo -e "${BLDRED}Final Build: Stage 3 failed with Error!${TXTCLR}"
+    echo -e "${BLDRED}failed to build Boot Image, exiting ...${TXTCLR}"
+    echo " "
+    exit 1
+  fi
+else
+  echo " "
+  echo -e "${BLDRED}Final Build: Stage 2 failed with Error!${TXTCLR}"
+  echo -e "${BLDRED}failed to compile Kernel Image, exiting ...${TXTCLR}"
+  echo " "
+  exit 1
+fi
