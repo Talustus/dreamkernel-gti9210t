@@ -10,25 +10,34 @@ BLDGRN='\e[1;32m' 		# Green-Bold
 BLDYLW='\e[1;33m' 		# Yellow-Bold
 TXTCLR='\e[0m'    		# Text Reset
 #
-# Directory Settings
+## Settings
 #
+
+## Create TAR File for ODIN?
+ODIN_TAR=yes		# yes/no
+
+## Create ZIP File for CWM? (needs a updater-template.zip in releasedir)
+CWM_ZIP=yes		# yes/no
+
+##
+## Directory Settings
+##
 export KERNELDIR=`readlink -f .`
 export TOOLBIN="${KERNELDIR}/../bin"
-# export INITRAMFS_SOURCE="${KERNELDIR}/../initramfs-ics-stock"
 export INITRAMFS_SOURCE="${KERNELDIR}/../initramfs"
 export INITRAMFS_TMP="/tmp/initramfs-gti9210t"
 export RELEASEDIR="${KERNELDIR}/../releases"
 
 # InitRamFS Branch to use ...
-export RAMFSBRANCH=cm10-testing
+# export RAMFSBRANCH=cm10-testing
 
 # Build Hostname
-export KBUILD_BUILD_HOST=`hostname | sed 's|ip-projects.de|dream-irc.com|g'`
+export KBUILD_BUILD_HOST=`hostname | sed 's|deblap|vs117.dream-irc.com|g'`
 
 #
 # Version of this Build
 #
-KRNRLS="DreamKernel-GTI9210T-v1.8.3CM10"
+KRNRLS="DreamKernel-GTI9210T-v1.8.4CM10"
 
 
 #
@@ -65,7 +74,7 @@ fi
 # remove Files of old/previous Builds
 #
 echo -e "${TXTYLW}Deleting Files of previous Builds ...${TXTCLR}"
-make -j9 clean 2>&1 | grcat conf.gcc
+# make -j2 clean 2>&1 | grcat conf.gcc
 echo "0" > $KERNELDIR/.version
 
 # Remove Old initramfs
@@ -74,8 +83,8 @@ rm -rvf $INITRAMFS_TMP
 rm -vf $INITRAMFS_TMP.*
 
 # Clean Up old Buildlogs
-echo -e "${TXTYLW}Deleting old logfiles${TXTCLR}"
-rm -v $KERNELDIR/compile-*.log
+# echo -e "${TXTYLW}Deleting old logfiles${TXTCLR}"
+# rm -v $KERNELDIR/compile-*.log
 
 # Remove previous Kernelfiles
 echo -e "${TXTYLW}Deleting old Kernelfiles${TXTCLR}"
@@ -88,7 +97,7 @@ rm -v $KERNELDIR/boot.img
 #
 echo -e "${TXTYLW}CleanUP done, starting kernel Build ...${TXTCLR}"
 
-nice -n 10 make -j9 modules 2>&1 | grcat conf.gcc
+nice -n 10 make -j2 modules 2>&1 | grcat conf.gcc
 # nice -n 10 make -j12 KBUILD_BUILD_HOST="$KBUILD_BUILD_HOST" modules 2>&1 | tee compile-modules.log || exit 1
 #
 if [ "$?" == "0" ];
@@ -155,7 +164,7 @@ sleep 1
 # Start Final Kernel Build
 #
 echo -e "${TXTYLW}Starting final Build: Stage 2${TXTCLR}"
-nice -n 10 make -j9 zImage 2>&1 | grcat conf.gcc
+nice -n 10 make -j2 zImage 2>&1 | grcat conf.gcc
 
 if [ "$?" == "0" ];
 then
@@ -175,22 +184,41 @@ then
     echo " "
     rm -v $KERNELDIR/arch/arm/boot/kernel
 
-    # Create ODIN Flashable TAR archiv
-    #
+    # Archive Name for ODIN/CWM archives
     ARCNAME="$KRNRLS-`date +%Y%m%d%H%M%S`"
-    echo -e "${BLDRED}creating ODIN-Flashable TARand CWM Zip ${ARCNAME}${TXTCLR}"
-    cd $KERNELDIR
-    tar cfv $RELEASEDIR/$ARCNAME.tar boot.img
 
-    ## CWM
-    cp -v $RELEASEDIR/updater-template.zip $RELEASEDIR/$ARCNAME-CWM.zip
-    zip -u $RELEASEDIR/$ARCNAME-CWM.zip boot.img
+    ## Create ODIN Flashable TAR archiv ?
+    if [ "${ODIN_TAR}" == "yes" ];
+    then
+      echo -e "${BLDRED}creating ODIN-Flashable TAR: ${ARCNAME}${TXTCLR}"
+      cd $KERNELDIR
+      tar cfv $RELEASEDIR/$ARCNAME.tar boot.img
+      echo -e "${BLDRED}$(ls -lh ${RELEASEDIR}/${ARCNAME}.tar)${TXTCLR}"
+    else
+      echo -e "${BLDRED}Skipping ODIN-TAR creation${TXTCLR}"
+      echo "   "
+    fi
 
+    ## Check for update template
+    if [ ! -f $RELEASEDIR/updater-template.zip ];
+    then
+      CWM_ZIP=no
+    fi
+
+    ## Create CWM-ZIP ?
+    if [ "${CWM_ZIP}" == "yes" ];
+    then
+      echo -e "${BLDRED}creating CWM-Flashable ZIP: ${ARCNAME}-CWM.zip${TXTCLR}"
+      cp -v $RELEASEDIR/updater-template.zip $RELEASEDIR/$ARCNAME-CWM.zip
+      zip -u $RELEASEDIR/$ARCNAME-CWM.zip boot.img
+      ls -lh $RELEASEDIR/$ARCNAME-CWM.zip
+      echo -e "${BLDRED}$(ls -lh ${RELEASEDIR}/${ARCNAME}-CWM.zip)${TXTCLR}"
+      echo -e "  "
+    else
+      echo -e "${BLDRED}Skipping CWM-ZIP creation${TXTCLR}"
+      echo "  "
+    fi
     echo "  "
-    ls -lh $RELEASEDIR/$ARCNAME.tar
-    ls -lh $RELEASEDIR/$ARCNAME-CWM.zip
-    cd -
-
     echo -e "${BLDGRN}	#############################	${TXTCLR}"
     echo -e "${TXTRED}	# Script completed, exiting #	${TXTCLR}"
     echo -e "${BLDGRN}	#############################	${TXTCLR}"
