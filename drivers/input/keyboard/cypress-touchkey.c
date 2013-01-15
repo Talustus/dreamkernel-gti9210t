@@ -1437,7 +1437,7 @@ static ssize_t touch_led_control(struct device *dev, struct device_attribute *at
 			printk(KERN_ERR "[TKEY] led_control_err data =%c \n",buf[0]);
 		}
 #if defined(CONFIG_USA_MODEL_SGH_I577) || defined(CONFIG_CAN_MODEL_SGH_I577R)
-		int_data = int_data *0x10;		
+		int_data = int_data *0x10;
 #elif defined(CONFIG_KOR_MODEL_SHV_E110S) || defined (CONFIG_USA_MODEL_SGH_T989) || defined (CONFIG_JPN_MODEL_SC_03D)\
 	|| defined (CONFIG_USA_MODEL_SGH_I727) || defined (CONFIG_USA_MODEL_SGH_T769)
 #if defined(CONFIG_EUR_MODEL_GT_I9210)
@@ -1449,7 +1449,7 @@ static ssize_t touch_led_control(struct device *dev, struct device_attribute *at
 #else //E110S
 	if (get_hw_rev() >=0x02 )
 #endif
-      {     
+      {
 		int_data = int_data *0x10;
 	}
 #elif defined(CONFIG_KOR_MODEL_SHV_E160L)\
@@ -1465,11 +1465,11 @@ static ssize_t touch_led_control(struct device *dev, struct device_attribute *at
 			if(Q1_debug_msg)
 				printk(KERN_DEBUG "touch_led_control int_data: %d\n", int_data);
 		#endif
-		
+
 		errnum = i2c_touchkey_write((u8*)&int_data, 1);
-		if(errnum==-ENODEV) {
+		if (errnum < 0) {
 			touchled_cmd_reversed = 1;
-		}		
+		}
 		touchkey_led_status = int_data;
 	} else
 		printk("touch_led_control Error\n");
