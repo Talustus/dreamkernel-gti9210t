@@ -728,7 +728,7 @@ int compact_pgdat(pg_data_t *pgdat, int order)
 	return __compact_pgdat(pgdat, &cc);
 }
 
-static int compact_node(int nid, bool sync)
+static int compact_node(int nid)
 {
 	struct compact_control cc = {
 		.order = -1,
