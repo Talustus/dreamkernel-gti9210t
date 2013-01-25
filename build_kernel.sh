@@ -37,7 +37,7 @@ export KBUILD_BUILD_HOST=`hostname | sed 's|deblap|vs117.dream-irc.com|g'`
 #
 # Version of this Build
 #
-KRNRLS="DreamKernel-GTI9210T-v1.8.4CM10"
+KRNRLS="DreamKernel-GTI9210T-v1.8.5CM10"
 
 
 #
@@ -166,7 +166,7 @@ sleep 1
 echo -e "${TXTYLW}Starting final Build: Stage 2${TXTCLR}"
 nice -n 10 make -j2 zImage 2>&1 | grcat conf.gcc
 
-if [ "$?" == "0" ];
+if [ -f  $KERNELDIR/arch/arm/boot/zImage ];
 then
   echo " "
   echo -e "${TXTGRN}Final Build: Stage 3. Creating bootimage !${TXTCLR}"
