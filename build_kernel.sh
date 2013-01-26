@@ -79,8 +79,8 @@ echo "0" > $KERNELDIR/.version
 
 # Remove Old initramfs
 echo -e "${TXTYLW}Deleting old InitRAMFS${TXTCLR}"
-rm -rvf $INITRAMFS_TMP
-rm -vf $INITRAMFS_TMP.*
+rm -rf $INITRAMFS_TMP
+rm -rf $INITRAMFS_TMP.*
 
 # Clean Up old Buildlogs
 # echo -e "${TXTYLW}Deleting old logfiles${TXTCLR}"
@@ -88,9 +88,9 @@ rm -vf $INITRAMFS_TMP.*
 
 # Remove previous Kernelfiles
 echo -e "${TXTYLW}Deleting old Kernelfiles${TXTCLR}"
-rm -v $KERNELDIR/arch/arm/boot/kernel
-rm -v $KERNELDIR/arch/arm/boot/zImage
-rm -v $KERNELDIR/boot.img
+rm $KERNELDIR/arch/arm/boot/kernel
+rm $KERNELDIR/arch/arm/boot/zImage
+rm $KERNELDIR/boot.img
 
 
 # Start the Build
@@ -123,9 +123,9 @@ sleep 1
 # remove repository realated files
 #
 echo -e "${TXTGRN}Deleting Repository related Files (.git, .hg etc)${TXTCLR}"
-find $INITRAMFS_TMP -name .git -exec rm -rvf {} \;
-find $INITRAMFS_TMP -name EMPTY_DIRECTORY -exec rm -rvf {} \;
-rm -rvf $INITRAMFS_TMP/.hg
+find $INITRAMFS_TMP -name .git -exec rm -rf {} \;
+find $INITRAMFS_TMP -name EMPTY_DIRECTORY -exec rm -rf {} \;
+rm -rf $INITRAMFS_TMP/.hg
 
 # copy modules into initramfs
 #
@@ -182,7 +182,7 @@ then
     echo " "
     echo -e "${TXTGRN}Final Build: Stage 3 completed successfully!${TXTCLR}"
     echo " "
-    rm -v $KERNELDIR/arch/arm/boot/kernel
+    rm $KERNELDIR/arch/arm/boot/kernel
 
     # Archive Name for ODIN/CWM archives
     ARCNAME="$KRNRLS-`date +%Y%m%d%H%M%S`"
@@ -192,7 +192,7 @@ then
     then
       echo -e "${BLDRED}creating ODIN-Flashable TAR: ${ARCNAME}${TXTCLR}"
       cd $KERNELDIR
-      tar cfv $RELEASEDIR/$ARCNAME.tar boot.img
+      tar cf $RELEASEDIR/$ARCNAME.tar boot.img
       echo -e "${BLDRED}$(ls -lh ${RELEASEDIR}/${ARCNAME}.tar)${TXTCLR}"
     else
       echo -e "${BLDRED}Skipping ODIN-TAR creation${TXTCLR}"
@@ -209,7 +209,7 @@ then
     if [ "${CWM_ZIP}" == "yes" ];
     then
       echo -e "${BLDRED}creating CWM-Flashable ZIP: ${ARCNAME}-CWM.zip${TXTCLR}"
-      cp -v $RELEASEDIR/updater-template.zip $RELEASEDIR/$ARCNAME-CWM.zip
+      cp $RELEASEDIR/updater-template.zip $RELEASEDIR/$ARCNAME-CWM.zip
       zip -u $RELEASEDIR/$ARCNAME-CWM.zip boot.img
       ls -lh $RELEASEDIR/$ARCNAME-CWM.zip
       echo -e "${BLDRED}$(ls -lh ${RELEASEDIR}/${ARCNAME}-CWM.zip)${TXTCLR}"
