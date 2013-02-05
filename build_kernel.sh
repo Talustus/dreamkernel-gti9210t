@@ -28,6 +28,9 @@ export INITRAMFS_SOURCE="${KERNELDIR}/../initramfs"
 export INITRAMFS_TMP="/tmp/initramfs-gti9210t"
 export RELEASEDIR="${KERNELDIR}/../releases"
 
+# get time of startup
+time_start=$(date +%s.%N)
+
 # InitRamFS Branch to use ...
 # export RAMFSBRANCH=cm10-testing
 
@@ -57,6 +60,9 @@ then
   else
     echo -e "${BLDRED}Error: ${1} is not a directory !${TXTCLR}"
     echo -e "${BLDRED}Nothing todo, Exiting ... !${TXTCLR}"
+    # finished? get elapsed time
+    time_end=$(date +%s.%N)
+    echo "${BLDYLW}Total time elapsed: ${TCTCLR}${TXTGRN}$(echo "($time_start - $time_end) / 60"|bc ) ${TXTYLW}minutes${TXTGRN} ($(echo "$time_end - $time_start"|bc ) ${TXTYLW}seconds) ${TXTCLR}"
     exit 1
   fi
 fi
@@ -66,7 +72,6 @@ then
   echo -e "${TXTYLW}Kernel config does not exists, creating default config (dream_gti9210t_defconfig):${TXTCLR}"
   make ARCH=arm dream_gti9210t_defconfig  2>&1 | grcat conf.gcc
   echo -e "${TXTYLW}Kernel config created ...${TXTCLR}"
-  # exit 0
 fi
 
 . $KERNELDIR/.config
@@ -74,8 +79,8 @@ fi
 # remove Files of old/previous Builds
 #
 echo -e "${TXTYLW}Deleting Files of previous Builds ...${TXTCLR}"
-# make -j2 clean 2>&1 | grcat conf.gcc
-echo "0" > $KERNELDIR/.version
+make -j2 clean 2>&1 | grcat conf.gcc
+# echo "0" > $KERNELDIR/.version
 
 # Remove Old initramfs
 echo -e "${TXTYLW}Deleting old InitRAMFS${TXTCLR}"
@@ -106,6 +111,9 @@ then
   sleep 2
 else
   echo -e "${BLDRED}Modules Build failed, exiting  ...${TXTCLR}"
+    # finished? get elapsed time
+    time_end=$(date +%s.%N)
+    echo "${BLDYLW}Total time elapsed: ${TCTCLR}${TXTGRN}$(echo "($time_start - $time_end) / 60"|bc ) ${TXTYLW}minutes${TXTGRN} ($(echo "$time_end - $time_start"|bc ) ${TXTYLW}seconds) ${TXTCLR}"
   exit 1
 fi
 
@@ -222,12 +230,19 @@ then
     echo -e "${BLDGRN}	#############################	${TXTCLR}"
     echo -e "${TXTRED}	# Script completed, exiting #	${TXTCLR}"
     echo -e "${BLDGRN}	#############################	${TXTCLR}"
+    echo " "
+    # finished? get elapsed time
+    time_end=$(date +%s.%N)
+    echo "${BLDYLW}Total time elapsed: ${TCTCLR}${TXTGRN}$(echo "($time_start - $time_end) / 60"|bc ) ${TXTYLW}minutes${TXTGRN} ($(echo "$time_end - $time_start"|bc ) ${TXTYLW}seconds) ${TXTCLR}"
     exit 0
   else
     echo " "
     echo -e "${BLDRED}Final Build: Stage 3 failed with Error!${TXTCLR}"
     echo -e "${BLDRED}failed to build Boot Image, exiting ...${TXTCLR}"
     echo " "
+    # finished? get elapsed time
+    time_end=$(date +%s.%N)
+    echo "${BLDYLW}Total time elapsed: ${TCTCLR}${TXTGRN}$(echo "($time_start - $time_end) / 60"|bc ) ${TXTYLW}minutes${TXTGRN} ($(echo "$time_end - $time_start"|bc ) ${TXTYLW}seconds) ${TXTCLR}"
     exit 1
   fi
 else
@@ -235,5 +250,7 @@ else
   echo -e "${BLDRED}Final Build: Stage 2 failed with Error!${TXTCLR}"
   echo -e "${BLDRED}failed to compile Kernel Image, exiting ...${TXTCLR}"
   echo " "
+  time_end=$(date +%s.%N)
+  echo "${BLDYLW}Total time elapsed: ${TCTCLR}${TXTGRN}$(echo "($time_start - $time_end) / 60"|bc ) ${TXTYLW}minutes${TXTGRN} ($(echo "$time_end - $time_start"|bc ) ${TXTYLW}seconds) ${TXTCLR}"
   exit 1
 fi
