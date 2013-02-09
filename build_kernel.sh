@@ -40,7 +40,7 @@ export KBUILD_BUILD_HOST=`hostname | sed 's|deblap|vs117.dream-irc.com|g'`
 #
 # Version of this Build
 #
-KRNRLS="DreamKernel-GTI9210T-v1.8.5CM10"
+KRNRLS="DreamKernel-GTI9210T-v1.8.6CM10"
 
 
 #
@@ -233,7 +233,7 @@ then
     echo " "
     # finished? get elapsed time
     time_end=$(date +%s.%N)
-    echo "${BLDYLW}Total time elapsed: ${TCTCLR}${TXTGRN}$(echo "($time_start - $time_end) / 60"|bc ) ${TXTYLW}minutes${TXTGRN} ($(echo "$time_end - $time_start"|bc ) ${TXTYLW}seconds) ${TXTCLR}"
+    echo "${BLDYLW}Total time elapsed: ${TCTCLR}${TXTGRN}$(echo "($time_end - $time_start) / 60"|bc ) ${TXTYLW}minutes${TXTGRN} ($(echo "$time_end - $time_start"|bc ) ${TXTYLW}seconds) ${TXTCLR}"
     exit 0
   else
     echo " "
@@ -242,7 +242,7 @@ then
     echo " "
     # finished? get elapsed time
     time_end=$(date +%s.%N)
-    echo "${BLDYLW}Total time elapsed: ${TCTCLR}${TXTGRN}$(echo "($time_start - $time_end) / 60"|bc ) ${TXTYLW}minutes${TXTGRN} ($(echo "$time_end - $time_start"|bc ) ${TXTYLW}seconds) ${TXTCLR}"
+    echo -e "${BLDYLW}Total time elapsed: ${TCTCLR}${TXTGRN}$(echo "($time_end - $time_start) / 60"|bc ) ${TXTYLW}minutes${TXTGRN} ($(echo "$time_end - $time_start"|bc ) ${TXTYLW}seconds) ${TXTCLR}"
     exit 1
   fi
 else
