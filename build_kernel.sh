@@ -35,7 +35,7 @@ time_start=$(date +%s.%N)
 # export RAMFSBRANCH=cm10-testing
 
 # Build Hostname
-export KBUILD_BUILD_HOST=`hostname | sed 's|deblap|vs117.dream-irc.com|g'`
+export KBUILD_BUILD_HOST=`hostname | sed 's|ip-projects.de|dream-irc.com|g'`
 
 #
 # Version of this Build
@@ -62,7 +62,7 @@ then
     echo -e "${BLDRED}Nothing todo, Exiting ... !${TXTCLR}"
     # finished? get elapsed time
     time_end=$(date +%s.%N)
-    echo "${BLDYLW}Total time elapsed: ${TCTCLR}${TXTGRN}$(echo "($time_start - $time_end) / 60"|bc ) ${TXTYLW}minutes${TXTGRN} ($(echo "$time_end - $time_start"|bc ) ${TXTYLW}seconds) ${TXTCLR}"
+    echo -e "${BLDYLW}Total time elapsed: ${TCTCLR}${TXTGRN}$(echo "($time_end - $time_start) / 60"|bc ) ${TXTYLW}minutes${TXTGRN} ($(echo "$time_end - $time_start"|bc ) ${TXTYLW}seconds) ${TXTCLR}"
     exit 1
   fi
 fi
@@ -79,7 +79,7 @@ fi
 # remove Files of old/previous Builds
 #
 echo -e "${TXTYLW}Deleting Files of previous Builds ...${TXTCLR}"
-make -j2 clean 2>&1 | grcat conf.gcc
+make -j8 clean 2>&1 | grcat conf.gcc
 # echo "0" > $KERNELDIR/.version
 
 # Remove Old initramfs
@@ -102,7 +102,7 @@ rm $KERNELDIR/boot.img
 #
 echo -e "${TXTYLW}CleanUP done, starting kernel Build ...${TXTCLR}"
 
-nice -n 10 make -j2 modules 2>&1 | grcat conf.gcc
+nice -n 10 make -j8 modules 2>&1 | grcat conf.gcc
 # nice -n 10 make -j12 KBUILD_BUILD_HOST="$KBUILD_BUILD_HOST" modules 2>&1 | tee compile-modules.log || exit 1
 #
 if [ "$?" == "0" ];
@@ -113,7 +113,7 @@ else
   echo -e "${BLDRED}Modules Build failed, exiting  ...${TXTCLR}"
     # finished? get elapsed time
     time_end=$(date +%s.%N)
-    echo "${BLDYLW}Total time elapsed: ${TCTCLR}${TXTGRN}$(echo "($time_start - $time_end) / 60"|bc ) ${TXTYLW}minutes${TXTGRN} ($(echo "$time_end - $time_start"|bc ) ${TXTYLW}seconds) ${TXTCLR}"
+    echo -e "${BLDYLW}Total time elapsed: ${TCTCLR}${TXTGRN}$(echo "($time_end - $time_start) / 60"|bc ) ${TXTYLW}minutes${TXTGRN} ($(echo "$time_end - $time_start"|bc ) ${TXTYLW}seconds) ${TXTCLR}"
   exit 1
 fi
 
@@ -172,7 +172,7 @@ sleep 1
 # Start Final Kernel Build
 #
 echo -e "${TXTYLW}Starting final Build: Stage 2${TXTCLR}"
-nice -n 10 make -j2 zImage 2>&1 | grcat conf.gcc
+nice -n 10 make -j8 zImage 2>&1 | grcat conf.gcc
 
 if [ -f  $KERNELDIR/arch/arm/boot/zImage ];
 then
@@ -233,7 +233,7 @@ then
     echo " "
     # finished? get elapsed time
     time_end=$(date +%s.%N)
-    echo "${BLDYLW}Total time elapsed: ${TCTCLR}${TXTGRN}$(echo "($time_end - $time_start) / 60"|bc ) ${TXTYLW}minutes${TXTGRN} ($(echo "$time_end - $time_start"|bc ) ${TXTYLW}seconds) ${TXTCLR}"
+    echo -e "${BLDYLW}Total time elapsed: ${TCTCLR}${TXTGRN}$(echo "($time_end - $time_start) / 60"|bc ) ${TXTYLW}minutes${TXTGRN} ($(echo "$time_end - $time_start"|bc ) ${TXTYLW}seconds) ${TXTCLR}"
     exit 0
   else
     echo " "
@@ -251,6 +251,6 @@ else
   echo -e "${BLDRED}failed to compile Kernel Image, exiting ...${TXTCLR}"
   echo " "
   time_end=$(date +%s.%N)
-  echo "${BLDYLW}Total time elapsed: ${TCTCLR}${TXTGRN}$(echo "($time_start - $time_end) / 60"|bc ) ${TXTYLW}minutes${TXTGRN} ($(echo "$time_end - $time_start"|bc ) ${TXTYLW}seconds) ${TXTCLR}"
+  echo -e "${BLDYLW}Total time elapsed: ${TCTCLR}${TXTGRN}$(echo "($time_end - $time_start) / 60"|bc ) ${TXTYLW}minutes${TXTGRN} ($(echo "$time_end - $time_start"|bc ) ${TXTYLW}seconds) ${TXTCLR}"
   exit 1
 fi
