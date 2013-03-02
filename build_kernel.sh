@@ -40,7 +40,7 @@ export KBUILD_BUILD_HOST=`hostname | sed 's|ip-projects.de|dream-irc.com|g'`
 #
 # Version of this Build
 #
-KRNRLS="DreamKernel-GTI9210T-v1.8.6CM10"
+KRNRLS="DreamKernel-GTI9210T-v1.8.6.1CM10"
 
 
 #
@@ -180,7 +180,7 @@ then
   echo -e "${TXTGRN}Final Build: Stage 3. Creating bootimage !${TXTCLR}"
   echo " "
   sleep 1
-  cp -v $KERNELDIR/arch/arm/boot/zImage $KERNELDIR/arch/arm/boot/kernel
+  cp $KERNELDIR/arch/arm/boot/zImage $KERNELDIR/arch/arm/boot/kernel
 
   $TOOLBIN/mkbootimg --kernel $KERNELDIR/arch/arm/boot/kernel --ramdisk $INITRAMFS_TMP.img --cmdline "androidboot.hardware=qcom msm_watchdog.appsbark=0 msm_watchdog.enable=1 init=/sbin/init console=/dev/console" --base 0x40400000 --pagesize 2048 --ramdiskaddr 0x41800000 --output $KERNELDIR/boot.img
   # $TOOLBIN/mkbootimg --kernel $KERNELOUT/arch/arm/boot/kernel --ramdisk $WORK_DIR/ramdisk.img --cmdline "androidboot.hardware=qcom msm_watchdog.appsbark=0 msm_watchdog.enable=1 no_console_suspend=true" --base 0x40400000 --pagesize 2048 --ramdiskaddr 0x41800000 --output $KERNELOUT/boot.img
