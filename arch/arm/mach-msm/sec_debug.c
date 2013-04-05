@@ -165,9 +165,11 @@ unsigned int sec_dbg_buf_size	= 0;
 #ifdef CONFIG_SEC_DEBUG_SCHED_LOG
 
 static struct task_info gExcpTaskLog[2][SCHED_LOG_MAX] __cacheline_aligned;
+#ifdef CONFIG_SEC_DEBUG_IRQ_EXIT_LOG
 static struct irq_log gExcpIrqLog[2][SCHED_LOG_MAX] __cacheline_aligned;
 static struct enterexit_log gExcpIrqEnterExitLog[2][SCHED_LOG_MAX] __cacheline_aligned;
 static struct timer_log gExcpTimerLog[2][SCHED_LOG_MAX] __cacheline_aligned;
+#endif
 #ifdef CONFIG_SEC_DEBUG_DCVS_LOG
 static struct dcvs_debug gExcpDcvsLog[DCVS_LOG_MAX] __cacheline_aligned;
 #endif

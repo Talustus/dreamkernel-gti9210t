@@ -307,7 +307,7 @@ asmlinkage void __cpuinit secondary_start_kernel(void)
 	enter_lazy_tlb(mm, current);
 	local_flush_tlb_all();
 
-	pr_debug("CPU%u: Booted secondary processor\n", cpu);
+	// pr_debug("CPU%u: Booted secondary processor\n", cpu);
 
 	/*
 	 * All kernel threads share the same mm context; grab a
