@@ -42,6 +42,12 @@ config CPU_FREQ_STAT_DETAILS
 
 	  If in doubt, say N.
 
+config LINK_CPU_GOVERNORS
+	bool "Link CPU Governors"
+	depends on CPU_FREQ
+	help
+	  "This will force both governors to stay synced"
+
 config VDD_USERSPACE
 	bool "VDD sysfs interface"
 	default n
