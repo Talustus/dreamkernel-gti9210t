@@ -1683,7 +1683,9 @@ const int temper_table[][2] =  {
 
 static int sec_bat_check_temper_adc_USA(struct sec_bat_info *info)
 {
+#ifndef ADC_QUEUE_FEATURE
 	int ret = 0;
+#endif
 	int adc_data = 0, adc_physical = 0;
 	int rescale_adc = 0;
 	int high_block_temp_USA = HIGH_BLOCK_TEMP_ADC;
@@ -1803,7 +1805,9 @@ skip_hupdate:
 
 static int sec_bat_check_temper_adc_USA_nb(struct sec_bat_info *info)
 {
+#ifndef ADC_QUEUE_FEATURE
 	int ret = 0;
+#endif
 	int adc_data = 0, adc_physical = 0;
 	int temp = 0;
 	int array_size, i;
