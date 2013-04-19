@@ -400,7 +400,7 @@ int init_module(void)
     DbgOut((KERN_INFO "tspdrv: init_module.\n"));
 
     nRet = misc_register(&miscdev);
-	printk("[VIBETONZ:WJYOO] MISC_REGISTER nRet = %d\n", nRet);
+	// printk("[VIBETONZ:WJYOO] MISC_REGISTER nRet = %d\n", nRet);
 	if (nRet) 
     {
         DbgOut((KERN_ERR "tspdrv: misc_register failed.\n"));
