@@ -32,7 +32,6 @@ static int process_sdio_pending_irqs(struct mmc_host *host)
 	struct mmc_card *card = host->card;
 	int i, ret, count;
 	unsigned char pending;
-	struct sdio_func *func;
 
 	/*
 	 * If there is only 1 function registered
