@@ -8,6 +8,14 @@ config MSM_KGSL
 	  3D graphics driver. Required to use hardware accelerated
 	  OpenGL ES 2.0 and 1.1.
 
+config KGSL_GPU_OC
+	bool "MSM KGSL GPU Overclocking"
+	default n
+	help
+	  Allow GPU overclocking via SYSFS interface.
+	  and managing max GPU speed.
+	  3D max clock 320MHz, TODO: '2D' max clock 266MHz.
+
 config MSM_KGSL_CFF_DUMP
 	bool "Enable KGSL Common File Format (CFF) Dump Feature [Use with caution]"
 	default n
