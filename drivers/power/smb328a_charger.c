@@ -25,6 +25,10 @@
 #include <linux/smb328a_charger.h>
 #include <linux/i2c/fsa9480.h>
 
+#ifdef CONFIG_FORCE_FAST_CHARGE
+#include <linux/fastchg.h>
+#endif
+
 /* Register define */
 #define SMB328A_INPUT_AND_CHARGE_CURRENTS		0x00
 #define	SMB328A_CURRENT_TERMINATION			0x01
@@ -273,7 +277,13 @@ static void smb328a_charger_function_conrol(struct i2c_client *client)
 		data = (u8)val;
 		dev_info(&client->dev, "%s : reg (0x%x) = 0x%x\n",
 			__func__, reg, data);
+#ifdef CONFIG_FORCE_FAST_CHARGE
+	if (force_fast_charge != 0) {
+		set_data = 0x97;
+	} else if(chip->chg_mode == CHG_MODE_AC) {
+#else
 		if (chip->chg_mode == CHG_MODE_AC) {
+#endif
 #if defined(CONFIG_USA_MODEL_SGH_I717)
 			set_data = 0xB7; /* fast 1A */
 #else
@@ -304,7 +314,13 @@ static void smb328a_charger_function_conrol(struct i2c_client *client)
 		data = (u8)val;
 		dev_info(&client->dev, "%s : reg (0x%x) = 0x%x\n",
 			__func__, reg, data);
-		if (chip->chg_mode == CHG_MODE_AC)
+#ifdef CONFIG_FORCE_FAST_CHARGE
+                if (force_fast_charge != 0) {
+                        set_data = 0xb0;
+                } else if(chip->chg_mode == CHG_MODE_AC) {
+#else
+                if (chip->chg_mode == CHG_MODE_AC) {
+#endif
 			set_data = 0xb0; /* input 1A */
 		else if (chip->chg_mode == CHG_MODE_MISC)
 			set_data = 0x50; /* input 700mA */
@@ -804,7 +820,14 @@ static int smb328a_set_charging_current(struct i2c_client *client,
 
 	chip->chg_set_current = chg_current;
 
+#ifdef CONFIG_FORCE_FAST_CHG
+	if (config_fast_charge != 0) {
+		chip->chg_mode = CHG_MODE_AC;
+	}
+	else if (chg_current == 500 {
+#else
 	if (chg_current == 500) {
+#endif
 		chip->chg_mode = CHG_MODE_USB;
 	} else if (chg_current == 900) {
 		chip->chg_mode = CHG_MODE_AC;
@@ -1069,6 +1092,9 @@ static int smb328a_adjust_float_voltage(struct i2c_client *client,
 
 	dev_info(&client->dev, "%s :\n", __func__);
 
+#ifdef CONFIG_FORCE_FAST_CHARGE
+	if (force_fast_charge == 0)
+#endif
 	if (chip->chg_mode != CHG_MODE_AC) {
 		pr_err("%s: not AC, return!\n", __func__);
 		return -EINVAL;
@@ -1292,7 +1318,11 @@ static int smb328a_enable_charging(struct i2c_client *client)
 		data = (u8)val;
 		dev_info(&client->dev, "%s : reg (0x%x) = 0x%x\n",
 					__func__, reg, data);
+#ifdef CONFIG_FORCE_FAST_CHARGE
+		if (force_fast_charge != 0 || chip->chg_mode == CHG_MODE_AC ||
+#else
 		if (chip->chg_mode == CHG_MODE_AC ||
+#endif
 			chip->chg_mode == CHG_MODE_MISC ||
 			chip->chg_mode == CHG_MODE_UNKNOWN)
 			data = 0xad;
