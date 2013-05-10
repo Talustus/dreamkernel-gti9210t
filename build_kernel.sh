@@ -42,7 +42,7 @@ export KBUILD_BUILD_HOST=`hostname | sed 's|ip-projects.de|dream-irc.com|g'`
 # Version of this Build
 #
 ## got up to 2.0 for CM10.1
-KRNRLS="DreamKernel-GTI9210T-v2.0.6.1CM10.1"
+KRNRLS="DreamKernel-GTI9210T-v2.0.6.2CM10.1"
 
 
 #
