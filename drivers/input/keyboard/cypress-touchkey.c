@@ -35,6 +35,7 @@
 
 #include "cypress-touchkey.h"
 #include <linux/regulator/consumer.h>
+#include <mach/board-msm8660.h>
 
 /*
 Cypress touchkey register
@@ -1068,7 +1069,7 @@ static void init_hw(void)
 
 	struct pm8058_gpio_cfg touchkey_int_cfg =
 	{
-		13,
+		PM8058_GPIO_PM_TO_SYS(12),
 		{
 			.direction      = PM_GPIO_DIR_IN,
 			.pull           = PM_GPIO_PULL_NO,//PM_GPIO_PULL_NO,
